@@ -44,7 +44,7 @@ push:
 	git remote add origin git@github.com:${GITHUB_USERNAME}/${GITHUB_REPOSITORY_NAME}
 	git add .
 	-git commit -a -m "v${PROJECT_VERSION}"
-	git push
+	git push --set-upstream origin main
 
 deploy:
 	make uninstall
