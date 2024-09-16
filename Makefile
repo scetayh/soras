@@ -7,7 +7,8 @@ GITHUB_REPOSITORY_NAME = soras
 .PHONY: clean install uninstall pull push deploy
 
 ${PROJECT_NAME}:
-	make push
+	cd soras.slibsh && make uninstall && make install
+	cd soras.ssc && make uninstall && make clean && make && make install
 
 clean:
 	-rm -rf bin/*
