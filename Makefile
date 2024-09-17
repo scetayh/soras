@@ -4,25 +4,24 @@ PROJECT_TYPE =
 GITHUB_USERNAME = scetayh
 GITHUB_REPOSITORY_NAME = soras
 
-.PHONY: clean install uninstall pull push deploy
+.PHONY: clean install uninstall all
 
 ${PROJECT_NAME}:
 	cd soras.slibsh && sudo make uninstall && sudo make install
 	cd soras.ssc && sudo make uninstall && make clean && make && sudo make install
 
 clean:
-	-rm -rf bin/*
-	-rm -rf obj/*
+	rm -rfv bin/*
+	rm -rfv obj/*
 
 install:
 	if [ ${PROJECT_TYPE} = bin ]; then \
-		mkdir -p /usr/local/bin && cp bin/* /usr/local/bin/; \
+		mkdir -p /usr/local/bin && \
+		cp bin/* /usr/local/bin/; \
 	elif [ ${PROJECT_TYPE} = lib ]; then \
-		mkdir -p /usr/local/lib/${PROJECT_NAME} && cp lib/* /usr/local/lib/${PROJECT_NAME}/ && chmod 777 -R /usr/local/lib/${PROJECT_NAME}/*; \
-		echo "Operate the command below to add ${PROJECT_NAME} to your paths."; \
-		echo; \
-		echo "        echo \"/usr/local/lib/${PROJECT_NAME}\" >> /etc/paths"; \
-		echo; \
+		mkdir -p /usr/local/lib/${PROJECT_NAME} && \
+		cp lib/* /usr/local/lib/${PROJECT_NAME}/ && \
+		chmod 777 -R /usr/local/lib/${PROJECT_NAME}/*; \
 	else \
 		exit 1; \
 	fi
@@ -30,17 +29,12 @@ install:
 uninstall:
 	rm -rf /usr/local/${PROJECT_TYPE}/${PROJECT_NAME}
 
-pull:
+all:
 	git config pull.rebase false
 	git pull
-
-push:
+	make
 	git remote remove origin
 	git remote add origin git@github.com:${GITHUB_USERNAME}/${GITHUB_REPOSITORY_NAME}
 	git add .
-	-git commit -a -m "${MESSAGE}"
+	-git commit -a -m "v${PROJECT_VERSION}"
 	git push --set-upstream origin main
-
-deploy:
-	sudo make
-	make push
