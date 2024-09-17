@@ -36,5 +36,5 @@ all:
 	git remote remove origin
 	git remote add origin git@github.com:${GITHUB_USERNAME}/${GITHUB_REPOSITORY_NAME}
 	git add .
-	-git commit -a -m "v${PROJECT_VERSION}"
+	-git commit -a -m "${MESSAGE}"
 	git push --set-upstream origin main
