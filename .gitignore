@@ -364,4 +364,4 @@ FodyWeavers.xsd
 
 build/
 
-!test/bin
+!bin/

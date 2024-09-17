@@ -1,0 +1,151 @@
+#!/bin/bash
+ 
+## compiler: ssc-0.0.1-b9
+## host: Darwin YupyeSortaco.local 24.1.0 Darwin Kernel Version 24.1.0: Fri Aug 16 19:20:34 PDT 2024; root:xnu-11215.40.42~4/RELEASE_ARM64_T8112 arm64 arm Darwin
+## date: 20240917T201116Z
+ 
+#!/bin/bash
+
+export ssc_name=ssc
+export ssc_version=0.0.1-b9
+
+Slibsh_PrintMessage () 
+{ 
+    echo -n "$1: ";
+    [[ "$2" = d* ]] && echo -en "\e[1m\e[037mdebug: \e[0m";
+    [[ "$2" = i* ]] && echo -en "\e[1m\e[092minfo: \e[0m";
+    [[ "$2" = w* ]] && echo -en "\e[1m\e[093mwarning: \e[0m";
+    [[ "$2" = e* ]] && echo -en "\e[1m\e[091merror: \e[0m";
+    [[ "$2" = f* ]] && echo -en "\e[1m\e[031mfafal: \e[0m";
+    echo "$3"
+}
+Slibsh_PrintMessage_Debug () 
+{ 
+    Slibsh_PrintMessage "$1" d "$2"
+}
+Slibsh_PrintMessage_Error () 
+{ 
+    Slibsh_PrintMessage "$1" e "$2"
+}
+Slibsh_PrintMessage_Fafal () 
+{ 
+    Slibsh_PrintMessage "$1" f "$2"
+}
+Slibsh_PrintMessage_Fafal_InvalidExtensionName () 
+{ 
+    Slibsh_PrintMessage_Fafal "$1" "Invalid extension name in \`$2'."
+}
+Slibsh_PrintMessage_Fafal_ItemExists () 
+{ 
+    Slibsh_PrintMessage_Fafal "$1" "\`$2' exists."
+}
+Slibsh_PrintMessage_Fafal_ItemNotFound () 
+{ 
+    Slibsh_PrintMessage_Fafal "$1" "\`$2' not found."
+}
+Slibsh_PrintMessage_Fafal_SourceExpected () 
+{ 
+    Slibsh_PrintMessage_Fafal "$1" "Source expected."
+}
+Slibsh_PrintMessage_Fafal_TargetExpected () 
+{ 
+    Slibsh_PrintMessage_Fafal "$1" "Target expected."
+}
+Slibsh_PrintMessage_Fafal_TooManyArguments () 
+{ 
+    Slibsh_PrintMessage_Fafal "$1" "To many arguments."
+}
+Slibsh_PrintMessage_Info () 
+{ 
+    Slibsh_PrintMessage "$1" i "$2"
+}
+Slibsh_PrintMessage_Warning () 
+{ 
+    Slibsh_PrintMessage "$1" w "$2"
+}
+Ssc_CheckFiles () 
+{ 
+    [ ! -f "$ssc_source" ] && Slibsh_PrintMessage_Fafal_ItemNotFound "$0" "$ssc_source" && exit 1;
+    [ -f "$ssc_target" ] && Slibsh_PrintMessage_Fafal_ItemExists "$0" "$ssc_target" && exit 1;
+    [ ! "${ssc_source: -5}" = ".s.sh" ] && Slibsh_PrintMessage_Fafal_InvalidExtensionName "$0" "$ssc_source" && exit 1
+}
+Ssc_CheckParameters () 
+{ 
+    if [ "$#" -ne 2 ]; then
+        if [ "$#" -eq 0 ]; then
+            Slibsh_PrintMessage_Fafal_SourceExpected "$0";
+        else
+            if [ "$#" -eq 1 ]; then
+                Slibsh_PrintMessage_Fafal_TargetExpected "$0";
+            else
+                if [ "$#" -gt 2 ]; then
+                    Slibsh_PrintMessage_Fafal_TooManyArguments "$0";
+                fi;
+            fi;
+        fi;
+        exit 1;
+    fi
+}
+Ssc_DeleteComments () 
+{ 
+    sed -i '/#/!b;s/^/\n/;ta;:a;s/\n$//;t;s/\n\(\("[^"]*"\)\|\('\''[^'\'']*'\''\)\)/\1\n/;ta;s/\n\([^#]\)/\1\n/;ta;s/\n.*//' "$1"
+}
+Ssc_PrintBrand () 
+{ 
+    echo "$ssc_name (Soras Shell Compiler $ssc_version) $ssc_version";
+    echo "Copyright (C) 2024 Tarikko-ScetayhChan";
+    echo "This is free software; see the source for copying conditions.  There is NO";
+    echo "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+}
+Ssc_WriteCompilationInformation () 
+{ 
+    sed -i "1i\## date: $(date +%Y%m%dT%H%M%SZ)" "$ssc_target";
+    sed -i "1i\## host: $(uname -a)" "$ssc_target";
+    sed -i "1i\## compiler: $ssc_name-$ssc_version" "$ssc_target";
+    sed -i '1i\#!/bin/bash' "$ssc_target";
+    sed -i '1a\ ' "$ssc_target";
+    sed -i '5a\ ' "$ssc_target"
+}
+
+Ssc_PrintBrand
+Ssc_CheckParameters "$@"
+ssc_source="$1"
+ssc_target="$2"
+Ssc_CheckFiles
+ssc_sourceLineNumber=$(wc -l <"$ssc_source")
+
+for ((i = 1; i <= ssc_sourceLineNumber; i++)); do
+    [ "$(sed -n "${i}p" "$ssc_source")" = '##include {' ] &&
+        export ssc_includeHead=$((i + 1)) &&
+        break
+done
+
+if [ -z "$ssc_includeHead" ]; then
+    cat "$ssc_source" >>"$ssc_target"
+else
+    for ((i = ssc_includeHead; i <= ssc_sourceLineNumber; i++)); do
+        [ "$(sed -n "${i}p" "$ssc_source")" = '##}' ] &&
+            export ssc_includeTail=$((i - 1)) &&
+            break
+    done
+
+    if [ -z "$ssc_includeTail" ]; then
+        Slibsh_PrintMessage_Fafal "$0" "\`##}' expected." &&
+            exit 1
+    else
+        sed -n "1,$((ssc_includeHead - 2))p" "$ssc_source" >>"$ssc_target"
+
+        for ((i = ssc_includeHead; i <= ssc_includeTail; i++)); do
+            ssc_currentContent="$(sed -n "${i}p" "$ssc_source")"
+            export ssc_currentContent
+            eval "$ssc_currentContent"
+        done
+
+        typeset -f >>"$ssc_target"
+
+        sed -n "$((ssc_includeTail + 2)),$((ssc_sourceLineNumber + 1))p" "$ssc_source" >>"$ssc_target"
+    fi
+fi
+
+Ssc_WriteCompilationInformation
+chmod 555 -R "$ssc_target"
