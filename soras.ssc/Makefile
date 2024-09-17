@@ -1,5 +1,5 @@
 PROJECT_NAME = ssc
-PROJECT_VERSION = 0.0.1-b5
+PROJECT_VERSION = 0.0.1-b9
 PROJECT_TYPE = bin
 GITHUB_USERNAME = <GITHUB_USERNAME>
 GITHUB_REPOSITORY_NAME = <GITHUB_REPOSITORY_NAME>
@@ -22,9 +22,12 @@ clean:
 
 install:
 	if [ ${PROJECT_TYPE} = bin ]; then \
-		mkdir -p /usr/local/bin && cp bin/* /usr/local/bin/; \
+		mkdir -p /usr/local/bin && \
+			cp bin/* /usr/local/bin/; \
 	elif [ ${PROJECT_TYPE} = lib ]; then \
-		mkdir -p /usr/local/lib/${PROJECT_NAME} && cp lib/* /usr/local/lib/${PROJECT_NAME}/ && chmod 777 -R /usr/local/lib/${PROJECT_NAME}/*; \
+		mkdir -p /usr/local/lib/${PROJECT_NAME} && \
+			cp lib/* /usr/local/lib/${PROJECT_NAME}/ && \
+				chmod 777 -R /usr/local/lib/${PROJECT_NAME}/*; \
 		echo "Operate the command below to add ${PROJECT_NAME} to your paths."; \
 		echo; \
 		echo "        echo \"/usr/local/lib/${PROJECT_NAME}\" >> /etc/paths"; \
