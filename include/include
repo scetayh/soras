@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#. soras 1
+
+for i in ${PATH//:/ }; do {
+    [ -f "$i/$1" ] && \
+        . "$i/$1";
+}
+done;
+
+return 0;
