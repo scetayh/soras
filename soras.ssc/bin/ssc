@@ -1,13 +1,15 @@
 #!/bin/bash
  
-## compiler: ssc-0.0.1-b9
-## host: Darwin YupyeSortaco.local 24.1.0 Darwin Kernel Version 24.1.0: Fri Aug 16 19:20:34 PDT 2024; root:xnu-11215.40.42~4/RELEASE_ARM64_T8112 arm64 arm Darwin
-## date: 20240917T201116Z
+################################################################
+## compiler: ssc-0.0.1
+## host: Darwin YupyeSortaco.local 24.1.0 Darwin Kernel Version 24.1.0: Tue Sep 17 07:48:04 PDT 2024; root:xnu-11215.40.59~38/RELEASE_ARM64_T8112 arm64 arm Darwin
+## date: 20241019T174010Z
+################################################################
  
 #!/bin/bash
 
 export ssc_name=ssc
-export ssc_version=0.0.1-b9
+export ssc_version=0.0.1
 
 Slibsh_PrintMessage () 
 { 
@@ -92,19 +94,21 @@ Ssc_DeleteComments ()
 }
 Ssc_PrintBrand () 
 { 
-    echo "$ssc_name (Soras Shell Compiler $ssc_version) $ssc_version";
+    echo "$ssc_name (SorasShell Compiler) v$ssc_version";
     echo "Copyright (C) 2024 Tarikko-ScetayhChan";
     echo "This is free software; see the source for copying conditions.  There is NO";
     echo "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 }
 Ssc_WriteCompilationInformation () 
 { 
+    sed -i "1i\################################################################" "$ssc_target";
     sed -i "1i\## date: $(date +%Y%m%dT%H%M%SZ)" "$ssc_target";
     sed -i "1i\## host: $(uname -a)" "$ssc_target";
     sed -i "1i\## compiler: $ssc_name-$ssc_version" "$ssc_target";
+    sed -i "1i\################################################################" "$ssc_target";
     sed -i '1i\#!/bin/bash' "$ssc_target";
     sed -i '1a\ ' "$ssc_target";
-    sed -i '5a\ ' "$ssc_target"
+    sed -i '7a\ ' "$ssc_target"
 }
 
 Ssc_PrintBrand
@@ -115,7 +119,7 @@ Ssc_CheckFiles
 ssc_sourceLineNumber=$(wc -l <"$ssc_source")
 
 for ((i = 1; i <= ssc_sourceLineNumber; i++)); do
-    [ "$(sed -n "${i}p" "$ssc_source")" = '##include {' ] &&
+    [ "$(sed -n "${i}p" "$ssc_source")" = '#.include {' ] &&
         export ssc_includeHead=$((i + 1)) &&
         break
 done
@@ -124,13 +128,13 @@ if [ -z "$ssc_includeHead" ]; then
     cat "$ssc_source" >>"$ssc_target"
 else
     for ((i = ssc_includeHead; i <= ssc_sourceLineNumber; i++)); do
-        [ "$(sed -n "${i}p" "$ssc_source")" = '##}' ] &&
+        [ "$(sed -n "${i}p" "$ssc_source")" = '#.}' ] &&
             export ssc_includeTail=$((i - 1)) &&
             break
     done
 
     if [ -z "$ssc_includeTail" ]; then
-        Slibsh_PrintMessage_Fafal "$0" "\`##}' expected." &&
+        Slibsh_PrintMessage_Fafal "$0" "\`#.}' expected." &&
             exit 1
     else
         sed -n "1,$((ssc_includeHead - 2))p" "$ssc_source" >>"$ssc_target"
