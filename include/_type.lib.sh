@@ -21,3 +21,23 @@ function _isType () {
 function _isNotDeclared () {
     _isType "$1" "";
 }
+
+function _isDeclared () {
+    ! _isNotDeclared "$1";
+}
+
+function _isInt () {
+    _isType "$1" int;
+}
+
+function _isFloat () {
+    _isType "$1" float;
+}
+
+function _isStr () {
+    _isType "$1" str;
+}
+
+function _isBool () {
+    _isType "$1" bool;
+}
