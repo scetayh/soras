@@ -1,8 +1,8 @@
-PROJECT_NAME = soras
+PROJECT_NAME = sorasshell
 PROJECT_VERSION =
 PROJECT_TYPE =
 GITHUB_USERNAME = scetayh
-GITHUB_REPOSITORY_NAME = soras
+GITHUB_REPOSITORY_NAME = sorasshell
 
 .PHONY: clean install uninstall all
 
